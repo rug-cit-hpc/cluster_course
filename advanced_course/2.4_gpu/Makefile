@@ -1,6 +1,6 @@
-CC=mpicc
-CFLAGS=-O2 -fopenmp -c
-LDFLAGS=-O2 -fopenmp
+CC=pgcc
+CFLAGS=-O2 -c
+LDFLAGS=-O2
 SOURCES=mpi_omp_conv.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=mpi_omp_conv
