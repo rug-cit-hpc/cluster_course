@@ -9,5 +9,5 @@
 #SBATCH --output=mpi.out
 
 convert Microcrystals.jpg Microcrystals.rgb
-srun ./mpi_omp_conv Microcrystals.rgb 5184 3456 50 rgb
+./mpi_omp_conv Microcrystals.rgb 5184 3456 50 rgb
 convert -size 5184x3456  -depth 8 conv_Microcrystals.rgb conv_Microcrystals.jpg
