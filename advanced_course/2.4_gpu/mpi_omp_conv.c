@@ -26,6 +26,7 @@ void convolute_rgb(uint8_t *, uint8_t *, int, int, int, int, float **);
 void Usage(int, char **, char **, int *, int *, int *, color_t *);
 int divide_rows(int, int, int);
 uint8_t *offset(uint8_t *, int, int, int);
+double get_time();
 
 
 int main(int argc, char** argv) {
@@ -230,8 +231,7 @@ int main(int argc, char** argv) {
 #ifdef MPI
     timer = MPI_Wtime();
 #else
-    time_t start;
-    time(&start);
+    timer = get_time();
 #endif
 	/* Convolute "loops" times */
 	for (t = 0 ; t < loops ; t++) {
@@ -324,9 +324,7 @@ int main(int argc, char** argv) {
 #ifdef MPI
     timer = MPI_Wtime() - timer;
 #else
-    time_t end;
-    time(&end);
-    timer = (double) (end - start);
+    timer = get_time() - timer;
 #endif
 
 	/* Parallel write */
@@ -489,4 +487,11 @@ int divide_rows(int rows, int cols, int workers) {
         }
     }
     return best;
+}
+
+double get_time()
+{
+   struct timeval tv;
+   gettimeofday(&tv, NULL);
+   return (double) tv.tv_sec + (double)tv.tv_usec/1e6;
 }
