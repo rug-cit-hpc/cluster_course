@@ -3,8 +3,14 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdint.h>
+#ifdef MPI
 #include "mpi.h"
-#include "omp.h"
+#else
+#include <time.h>
+#endif
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -31,15 +37,25 @@ int main(int argc, char** argv) {
 	/* MPI world topology */
     int process_id, num_processes;
 	/* Find current task id */
+#ifdef MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &process_id);
+#else
+    num_processes = 1;
+    process_id = 0;
+#endif
 
     if(process_id == 0) {
+#ifdef _OPENMP
 	#pragma omp parallel
 	    num_threads_per_task = omp_get_num_threads();
+#else
+        num_threads_per_task =1;
+#endif
 	num_threads = num_processes * num_threads_per_task;
     }
+#ifdef MPI
 
 	/* MPI status */
     MPI_Status status;
@@ -57,6 +73,7 @@ int main(int argc, char** argv) {
     MPI_Request recv_south_req;
     MPI_Request recv_west_req;
     MPI_Request recv_east_req;
+#endif
 	
 	/* Neighbours */
 	int north = -1;
@@ -71,7 +88,9 @@ int main(int argc, char** argv) {
 		row_div = divide_rows(height, width, num_processes);
 		if (row_div <= 0 || height % row_div || num_processes % row_div || width % (col_div = num_processes / row_div)) {
 				fprintf(stderr, "%s: Cannot divide to processes\n", argv[0]);
+#ifdef MPI
 				MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+#endif
 				return EXIT_FAILURE;
 		}
 	}
@@ -79,6 +98,7 @@ int main(int argc, char** argv) {
 		image = malloc((strlen(argv[1])+1) * sizeof(char));
 		strcpy(image, argv[1]);
 	}
+#ifdef MPI
 	/* Broadcast parameters */
     MPI_Bcast(&width, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&height, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -86,11 +106,13 @@ int main(int argc, char** argv) {
     MPI_Bcast(&imageType, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&row_div, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&col_div, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
 	
 	/* Compute number of rows per process */
 	rows = height / row_div;
 	cols = width / col_div;
 
+#ifdef MPI
 	/* Create column data type for grey & rgb */
 	MPI_Type_vector(rows, 1, cols+2, MPI_BYTE, &grey_col_type);
 	MPI_Type_commit(&grey_col_type);
@@ -101,6 +123,7 @@ int main(int argc, char** argv) {
 	MPI_Type_commit(&grey_row_type);
 	MPI_Type_contiguous(3*cols, MPI_BYTE, &rgb_row_type);
 	MPI_Type_commit(&rgb_row_type);
+#endif
 
 	 /* Compute starting row and column */
     int start_row = (process_id / col_div) * rows;
@@ -125,7 +148,11 @@ int main(int argc, char** argv) {
 
 	/* Init arrays */
 	uint8_t *src = NULL, *dst = NULL, *tmpbuf = NULL, *tmp = NULL;
+#ifdef MPI
 	MPI_File fh;
+#else
+        FILE* fh;
+#endif
 	int filesize, bufsize, nbytes;
 	if (imageType == GREY) {
 		filesize = width * height;
@@ -142,26 +169,52 @@ int main(int argc, char** argv) {
 	}
 	if (src == NULL || dst == NULL) {
         fprintf(stderr, "%s: Not enough memory\n", argv[0]);
+#ifdef MPI
         MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+#endif
         return EXIT_FAILURE;
 	}
 
 	/* Parallel read */
+#ifdef MPI
 	MPI_File_open(MPI_COMM_WORLD, image, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+#else
+        fh = fopen(image,"r");
+#endif
 	if (imageType == GREY) {
 		for (i = 1 ; i <= rows ; i++) {
+#ifdef MPI
 			MPI_File_seek(fh, (start_row + i-1) * width + start_col, MPI_SEEK_SET);
+#else
+                        fseek(fh, (start_row + i-1) * width + start_col, SEEK_SET);
+#endif
 			tmpbuf = offset(src, i, 1, cols+2);
+#ifdef MPI
 			MPI_File_read(fh, tmpbuf, cols, MPI_BYTE, &status);
+#else 
+                        fread(tmpbuf, 1, cols, fh);
+#endif
 		}
 	} else if (imageType == RGB) {
 		for (i = 1 ; i <= rows ; i++) {
+#ifdef MPI
 			MPI_File_seek(fh, 3*(start_row + i-1) * width + 3*start_col, MPI_SEEK_SET);
+#else
+                        fseek(fh, 3*(start_row + i-1) * width + 3*start_col, SEEK_SET);
+#endif
 			tmpbuf = offset(src, i, 3, cols*3+6);
+#ifdef MPI
 			MPI_File_read(fh, tmpbuf, cols*3, MPI_BYTE, &status);
+#else 
+                        fread(tmpbuf, 1, cols*3, fh);
+#endif
 		}
 	}
+#ifdef MPI
 	MPI_File_close(&fh);
+#else
+        fclose(fh);
+#endif
 
 	/* Compute neighbours */
     if (start_row != 0)
@@ -174,10 +227,16 @@ int main(int argc, char** argv) {
         east = process_id + 1;
 	
 	/* Get time before */
+#ifdef MPI
     timer = MPI_Wtime();
+#else
+    time_t start;
+    time(&start);
+#endif
 	/* Convolute "loops" times */
 	for (t = 0 ; t < loops ; t++) {
         /* Send and request borders */
+#ifdef MPI
 		if (imageType == GREY) {
 			if (north != -1) {
 				MPI_Isend(offset(src, 1, 1, cols+2), 1, grey_row_type, north, 0, MPI_COMM_WORLD, &send_north_req);
@@ -213,10 +272,10 @@ int main(int argc, char** argv) {
 				MPI_Irecv(offset(src, 1, 3*cols+3, 3*cols+6), 1, rgb_col_type,  east, 0, MPI_COMM_WORLD, &recv_east_req);
 			}
 		}
-
+#endif
 		/* Inner Data Convolute */
 		convolute(src, dst, 1, rows, 1, cols, cols, rows, h, imageType);
-
+#ifdef MPI
 	    /* Request and compute */
 		if (north != -1) {
 			MPI_Wait(&recv_north_req, &status);
@@ -255,37 +314,69 @@ int main(int argc, char** argv) {
 			MPI_Wait(&send_south_req, &status);
 		if (east != -1)
 			MPI_Wait(&send_east_req, &status);
-
+#endif
 		/* swap arrays */
 		tmp = src;
 	    src = dst;
 	    dst = tmp;
 	}
 	/* Get time elapsed */
+#ifdef MPI
     timer = MPI_Wtime() - timer;
+#else
+    time_t end;
+    time(&end);
+    timer = (double) (end - start);
+#endif
 
 	/* Parallel write */
 	char *outImage = malloc((strlen(image) + 9) * sizeof(char));
 	strcpy(outImage, "conv_");
 	strcat(outImage, image);
+#ifdef MPI
 	MPI_File outFile;
 	MPI_File_open(MPI_COMM_WORLD, outImage, MPI_MODE_CREATE | MPI_MODE_WRONLY, MPI_INFO_NULL, &outFile);
+#else
+        FILE * outFile;
+        outFile = fopen(outImage,"w");
+#endif
 	if (imageType == GREY) {
 		for (i = 1 ; i <= rows ; i++) {
+#ifdef MPI
 			MPI_File_seek(outFile, (start_row + i-1) * width + start_col, MPI_SEEK_SET);
+#else
+                        fseek(outFile, (start_row + i-1) * width + start_col, SEEK_SET);
+#endif
 			tmpbuf = offset(src, i, 1, cols+2);
+#ifdef MPI
 			MPI_File_write(outFile, tmpbuf, cols, MPI_BYTE, MPI_STATUS_IGNORE);
+#else 
+                        fwrite(tmpbuf, 1, cols, outFile);
+#endif
 		}
 	} else if (imageType == RGB) {
 		for (i = 1 ; i <= rows ; i++) {
+#ifdef MPI
 			MPI_File_seek(outFile, 3*(start_row + i-1) * width + 3*start_col, MPI_SEEK_SET);
+#else
+                        fseek(outFile, 3*(start_row + i-1) * width + 3*start_col, SEEK_SET);
+#endif
 			tmpbuf = offset(src, i, 3, cols*3+6);
+#ifdef MPI
 			MPI_File_write(outFile, tmpbuf, cols*3, MPI_BYTE, MPI_STATUS_IGNORE);
+#else 
+                        fwrite(tmpbuf, 1, cols*3, outFile);
+#endif
 		}
 	}
+#ifdef MPI
 	MPI_File_close(&outFile);
+#else
+        fclose(outFile);
+#endif
 
 	/* Get times from other processes and print maximum */
+#ifdef MPI
     if (process_id != 0)
         MPI_Send(&timer, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     else {
@@ -294,13 +385,17 @@ int main(int argc, char** argv) {
             if (remote_time > timer)
                 timer = remote_time;
         }
+#endif
         printf("Run time: %f s\n", timer);
 	printf("Ran on:   %d tasks, with %d cores per task\n", num_processes, num_threads_per_task);
+#ifdef MPI
     }
+#endif
 
     /* De-allocate space */
     free(src);
     free(dst);
+#ifdef MPI
     MPI_Type_free(&rgb_col_type);
     MPI_Type_free(&rgb_row_type);
     MPI_Type_free(&grey_col_type);
@@ -308,6 +403,7 @@ int main(int argc, char** argv) {
 
 	/* Finalize and exit */
     MPI_Finalize();
+#endif
 	return EXIT_SUCCESS;
 }
 
@@ -371,7 +467,9 @@ void Usage(int argc, char **argv, char **image, int *width, int *height, int *lo
 		*imageType = RGB;
 	} else {
 		fprintf(stderr, "Error Input!\n%s image_name width height loops [rgb/grey].\n", argv[0]);
+#ifdef MPI
                 MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+#endif
 		exit(EXIT_FAILURE);
 	}
 }
