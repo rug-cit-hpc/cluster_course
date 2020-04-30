@@ -5,6 +5,10 @@
 #include <stdint.h>
 
 #ifdef _OPENACC
+/* MPI implementation is incompatible with the GPU code */
+/* For the OpenACC implementation it is assumed that the data stays */
+/* at the GPU. For MPI data has to be exchanged between hosts */
+/* Moving data to the host would kill the GPU performance */
 #undef MPI
 #endif
 
