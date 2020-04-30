@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
                         // h[i][j] = sharpening[i][j];
 		}
 	}
+#pragma acc enter data copyin(h[0:3][0:3])
 
 	/* Init arrays */
 	uint8_t *src = NULL, *dst = NULL, *tmpbuf = NULL, *tmp = NULL;
@@ -154,19 +155,21 @@ int main(int argc, char** argv) {
 #else
         FILE* fh;
 #endif
-	int filesize, bufsize, nbytes;
+	int filesize, bufsize, nbytes, array_size;
 	if (imageType == GREY) {
 		filesize = width * height;
 		bufsize = filesize / num_processes;
 		nbytes = bufsize / sizeof(uint8_t);
 		src = calloc((rows+2) * (cols+2), sizeof(uint8_t));
 		dst = calloc((rows+2) * (cols+2), sizeof(uint8_t));
+                array_size = (rows+2) * (cols+2);
 	} else if (imageType == RGB) {
 		filesize = width*3 * height;
 		bufsize = filesize / num_processes;
 		nbytes = bufsize / sizeof(uint8_t);
 		src = calloc((rows+2) * (cols*3+6), sizeof(uint8_t));
 		dst = calloc((rows+2) * (cols*3+6), sizeof(uint8_t));
+                array_size = (rows+2) * (cols*3+6);
 	}
 	if (src == NULL || dst == NULL) {
         fprintf(stderr, "%s: Not enough memory\n", argv[0]);
@@ -233,6 +236,7 @@ int main(int argc, char** argv) {
 #else
     timer = get_time();
 #endif
+#pragma acc enter data copyin(src[0:array_size]), create(dst[0:array_size])
 	/* Convolute "loops" times */
 	for (t = 0 ; t < loops ; t++) {
         /* Send and request borders */
@@ -320,6 +324,7 @@ int main(int argc, char** argv) {
 	    src = dst;
 	    dst = tmp;
 	}
+#pragma acc exit data copyout(src[0:array_size])
 	/* Get time elapsed */
 #ifdef MPI
     timer = MPI_Wtime() - timer;
@@ -391,6 +396,7 @@ int main(int argc, char** argv) {
 #endif
 
     /* De-allocate space */
+#pragma acc exit data delete(src[0:array_size],dst[array_size],h[0:3][0:3])
     free(src);
     free(dst);
     free(h);
@@ -408,6 +414,7 @@ int main(int argc, char** argv) {
 
 void convolute(uint8_t *src, uint8_t *dst, int row_from, int row_to, int col_from, int col_to, int width, int height, float** h, color_t imageType) {
 	int i, j;
+#pragma acc data present(src), present(dst), present(h)
 #pragma acc kernels
 	if (imageType == GREY) {
 #pragma omp parallel for shared(src, dst) schedule(static) collapse(2)
@@ -416,8 +423,8 @@ void convolute(uint8_t *src, uint8_t *dst, int row_from, int row_to, int col_fro
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_grey(src, dst, i, j, width+2, height, h);
 	} else if (imageType == RGB) {
-#pragma omp parallel for shared(src, dst) schedule(static) collapse(2)
-#pragma acc loop  gang,vector(128) independent collapse(2)
+#pragma omp parallel for shared(src, dst) schedule(static) collapse(2) 
+#pragma acc loop gang,vector(128) independent collapse(2)
 		for (i = row_from ; i <= row_to ; i++)
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_rgb(src, dst, i, j*3, width*3+6, height, h);
