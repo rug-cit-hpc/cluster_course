@@ -427,13 +427,13 @@ void convolute(uint8_t *src, uint8_t *dst, int row_from, int row_to, int col_fro
 #pragma acc kernels
 	if (imageType == GREY) {
 #pragma omp parallel for shared(src, dst) schedule(static) collapse(2)
-#pragma acc loop gang,vector(128) independent collapse(2)
+#pragma acc loop gang, vector independent collapse(2)
 		for (i = row_from ; i <= row_to ; i++)
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_grey(src, dst, i, j, width+2, height, h);
 	} else if (imageType == RGB) {
 #pragma omp parallel for shared(src, dst) schedule(static) collapse(2) 
-#pragma acc loop gang,vector(128) independent collapse(2)
+#pragma acc loop gang, vector independent collapse(2)
 		for (i = row_from ; i <= row_to ; i++)
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_rgb(src, dst, i, j*3, width*3+6, height, h);
