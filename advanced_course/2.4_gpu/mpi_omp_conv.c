@@ -407,19 +407,23 @@ int main(int argc, char** argv) {
 
 void convolute(uint8_t *src, uint8_t *dst, int row_from, int row_to, int col_from, int col_to, int width, int height, float** h, color_t imageType) {
 	int i, j;
+#pragma acc kernels
 	if (imageType == GREY) {
 #pragma omp parallel for shared(src, dst) schedule(static) collapse(2)
+#pragma acc loop gang,vector(128) independent collapse(2)
 		for (i = row_from ; i <= row_to ; i++)
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_grey(src, dst, i, j, width+2, height, h);
 	} else if (imageType == RGB) {
 #pragma omp parallel for shared(src, dst) schedule(static) collapse(2)
+#pragma acc loop  gang,vector(128) independent collapse(2)
 		for (i = row_from ; i <= row_to ; i++)
 			for (j = col_from ; j <= col_to ; j++)
 				convolute_rgb(src, dst, i, j*3, width*3+6, height, h);
 	} 
 }
 
+#pragma acc routine
 void convolute_grey(uint8_t *src, uint8_t *dst, int x, int y, int width, int height, float** h) {
 	int i, j, k, l;
 	float val = 0;
@@ -429,6 +433,7 @@ void convolute_grey(uint8_t *src, uint8_t *dst, int x, int y, int width, int hei
 	dst[width * x + y] = min(max(val,0),255);
 }
 
+#pragma acc routine
 void convolute_rgb(uint8_t *src, uint8_t *dst, int x, int y, int width, int height, float** h) {
 	int i, j, k, l;
 	float redval = 0, greenval = 0, blueval = 0;
