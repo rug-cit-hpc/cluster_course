@@ -3,6 +3,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdint.h>
+
+#ifdef _OPENACC
+#undef MPI
+#endif
+
 #ifdef MPI
 #include "mpi.h"
 #else
