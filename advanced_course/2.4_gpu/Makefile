@@ -1,5 +1,5 @@
 CC=pgcc
-TARGET=-ta=tesla:cc60,managed
+TARGET=-ta=tesla:cc60
 CFLAGS=-acc -fast $(TARGET) -Minfo=accel -c
 LDFLAGS=-acc $(TARGET) -fast 
 SOURCES=mpi_omp_conv.c
