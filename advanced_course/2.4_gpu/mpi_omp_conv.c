@@ -6,7 +6,7 @@
 #ifdef MPI
 #include "mpi.h"
 #else
-#include <time.h>
+#include <sys/time.h>
 #endif
 #ifdef _OPENMP
 #include <omp.h>
@@ -393,6 +393,7 @@ int main(int argc, char** argv) {
     /* De-allocate space */
     free(src);
     free(dst);
+    free(h);
 #ifdef MPI
     MPI_Type_free(&rgb_col_type);
     MPI_Type_free(&rgb_row_type);
