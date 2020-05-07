@@ -17,12 +17,20 @@ fi
 # Check if file exists
 if [ -e $1 ]
 then
+    # Clean up the module environment
+    module purge
+    # Load the compilers
+    module load foss/2018a
+    # Compile the program
+    make
+
     # Convert the jpg file to the rgb format for easy processing
     convert $1 $1.rgb
     # Run the convolution filter program on the image
-    srun ./mpi_omp_conv $1.rgb 5184 3456 1 rgb
+    ./mpi_omp_conv $1.rgb 5184 3456 1 rgb
     # Convert the resulting file back to jpg format
     convert -size 5184x3456  -depth 8 conv_$1.rgb conv_$1
+
     # Remove the intermediate files
     rm $1.rgb conv_$1.rgb
 else

@@ -22,12 +22,21 @@ then
     height=$(identify -format "%h" $1)
     echo "Width: " $width
     echo "Height: " $height
+    
+    # Clean up the module environment
+    module purge
+    # Load the compilers
+    module load foss/2018a
+    # Compile the program
+    make
+
     # Convert the jpg file to the rgb format for easy processing
     convert $1 $1.rgb
     # Run the convolution filter program on the image
-    srun ./mpi_omp_conv $1.rgb $width $height 1 rgb
+    ./mpi_omp_conv $1.rgb $width $height 1 rgb
     # Convert the resulting file back to jpg format
     convert -size ${width}x${height}  -depth 8 conv_$1.rgb conv_$1
+    
     # Remove the intermediate files
     rm $1.rgb conv_$1.rgb
 else
