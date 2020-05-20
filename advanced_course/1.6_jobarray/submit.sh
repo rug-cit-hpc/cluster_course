@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Determine list of images
-images=$(ls -1 ../images/*.jpg)
+images=../images/*.jpg
 
 for image in $images
 do
