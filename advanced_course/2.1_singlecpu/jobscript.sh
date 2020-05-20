@@ -24,5 +24,3 @@ convert -size 5184x3456 -depth 8 conv_Microcrystals.rgb conv_Microcrystals.jpg
 
 # Remove the intermediate files
 rm Microcrystals.rgb conv_Microcrystals.rgb
-
-
