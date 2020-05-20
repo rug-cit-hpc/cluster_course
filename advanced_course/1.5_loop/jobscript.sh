@@ -31,8 +31,6 @@ then
     module purge
     # Load the compilers
     module load foss/2018a
-    # Compile the program
-    make
 
     # Convert the jpg file to the rgb format for easy processing
     convert $dirname/$filename $filename.rgb
