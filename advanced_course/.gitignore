@@ -2,3 +2,4 @@ mpi_omp_conv
 *.o
 *.rgb
 conv_*.jpg
+slurm*.out
