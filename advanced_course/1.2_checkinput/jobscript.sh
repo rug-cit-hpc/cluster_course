@@ -14,6 +14,8 @@ module load foss/2018a
 # Compile the program
 make
 
+echo "Processing image: " $1
+
 # Convert the jpg file to the rgb format for easy processing
 convert $1 $1.rgb
 # Run the convolution filter program on the image

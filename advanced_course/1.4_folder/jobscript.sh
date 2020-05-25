@@ -17,6 +17,8 @@ fi
 # Check if file exists
 if [ -e $1 ]
 then
+    echo "Processing image: " $1
+
     # Determine width and height of the image
     width=$(identify -format "%w" $1)
     height=$(identify -format "%h" $1)
@@ -40,6 +42,6 @@ then
     # Remove the intermediate files
     rm $1.rgb conv_$1.rgb
 else
-    echo "ERROR: File does not exist"
+    echo "ERROR: File $1 does not exist"
     exit -1
 fi

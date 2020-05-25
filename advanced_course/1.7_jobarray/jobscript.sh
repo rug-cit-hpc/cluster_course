@@ -46,6 +46,6 @@ then
     # Remove the intermediate files
     rm "$filename.rgb" "conv_$filename.rgb"
 else
-    echo "ERROR: File does not exist"
+    echo "ERROR: File $1 does not exist"
     exit -1
 fi

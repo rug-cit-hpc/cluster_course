@@ -24,6 +24,8 @@ then
     # Compile the program
     make
 
+    echo "Processing image: " $1
+
     # Convert the jpg file to the rgb format for easy processing
     convert $1 $1.rgb
     # Run the convolution filter program on the image
@@ -34,6 +36,6 @@ then
     # Remove the intermediate files
     rm $1.rgb conv_$1.rgb
 else
-    echo "ERROR: File does not exist"
+    echo "ERROR: File $1 does not exist"
     exit -1
 fi

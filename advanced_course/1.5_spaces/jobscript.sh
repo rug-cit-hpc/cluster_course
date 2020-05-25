@@ -17,6 +17,8 @@ fi
 # Check if file exists
 if [ -e $1 ]
 then
+    echo "Processing image: " $1
+
     # Get the directory in which the file is stored
     dirname=$(dirname $1)
     filename=$(basename $1)
@@ -44,6 +46,6 @@ then
     # Remove the intermediate files
     rm $filename.rgb conv_$filename.rgb
 else
-    echo "ERROR: File does not exist"
+    echo "ERROR: File $1 does not exist"
     exit -1
 fi
