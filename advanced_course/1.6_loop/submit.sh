@@ -11,4 +11,4 @@ make
 images=../images/*.jpg
 
 # Submit a job
-sbatch ./jobscript.sh ../images/Makemo.jpg
+sbatch ./jobscript.sh "../images/Sarus Crane Duet.jpg"
