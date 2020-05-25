@@ -19,7 +19,7 @@ if [ -e "$1" ]
 then
     # Find the n-th image in the input file
     image=$( )
-    echo "Processing image: " $1
+    echo "Processing image: " $image
 
     # Get the directory in which the file is stored
     dirname=$(dirname "$1")
