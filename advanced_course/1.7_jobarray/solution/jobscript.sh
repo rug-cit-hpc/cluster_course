@@ -35,7 +35,7 @@ then
     # Clean up the module environment
     module purge
     # Load the compilers
-    module load foss/2018a
+    module load foss/2020a
 
     # Convert the jpg file to the rgb format for easy processing
     convert "$dirname/$filename" "$filename.rgb"

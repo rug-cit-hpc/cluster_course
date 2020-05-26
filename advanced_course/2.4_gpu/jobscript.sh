@@ -6,7 +6,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --partition=short
 #SBATCH --job-name=Blurring
-#SBATCH --output=mpi.out
+#SBATCH --output=gpu.out
 
 # Clean up the module environment
 module purge
