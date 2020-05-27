@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
             // h[i][j] = box_blur[i][j] / 9.0;
             // h[i][j] = gaussian_blur[i][j] / 16.0;
             h[i][j] = edge_detection[i][j];
-                        // h[i][j] = sharpening[i][j];
+            // h[i][j] = sharpening[i][j];
         }
     }
 
