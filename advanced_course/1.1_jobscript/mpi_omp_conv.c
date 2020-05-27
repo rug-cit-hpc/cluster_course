@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &process_id);
 
     if(process_id == 0) {
-    #pragma omp parallel
+        #pragma omp parallel
         num_threads_per_task = omp_get_num_threads();
-    num_threads = num_processes * num_threads_per_task;
+        num_threads = num_processes * num_threads_per_task;
     }
 
     /* MPI status */
@@ -70,9 +70,9 @@ int main(int argc, char** argv) {
         /* Division of data in each process */
         row_div = divide_rows(height, width, num_processes);
         if (row_div <= 0 || height % row_div || num_processes % row_div || width % (col_div = num_processes / row_div)) {
-                fprintf(stderr, "%s: Cannot divide to processes\n", argv[0]);
-                MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
-                return EXIT_FAILURE;
+            fprintf(stderr, "%s: Cannot divide to processes\n", argv[0]);
+            MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
     }
     if (process_id != 0) {
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     int box_blur[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
     int gaussian_blur[3][3] = {{1, 2, 1}, {2, 4, 2}, {1, 2, 1}};
     int edge_detection[3][3] = {{-1, -1, -1}, {-1, 8, -1}, {-1, -1, -1}};
-        int sharpening[3][3] = {{0, -1, 0}, {-1, 5, -1}, {0, -1, 0}};
+    int sharpening[3][3] = {{0, -1, 0}, {-1, 5, -1}, {0, -1, 0}};
     float **h = malloc(3 * sizeof(float *));
     for (i = 0 ; i < 3 ; i++)
         h[i] = malloc(3 * sizeof(float));
@@ -220,7 +220,6 @@ int main(int argc, char** argv) {
         /* Request and compute */
         if (north != -1) {
             MPI_Wait(&recv_north_req, &status);
-
             convolute(src, dst, 1, 1, 2, cols-1, cols, rows, h, imageType);
         }
         if (west != -1) {
@@ -371,7 +370,7 @@ void Usage(int argc, char **argv, char **image, int *width, int *height, int *lo
         *imageType = RGB;
     } else {
         fprintf(stderr, "Error Input!\n%s image_name width height loops [rgb/grey].\n", argv[0]);
-                MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
         exit(EXIT_FAILURE);
     }
 }
