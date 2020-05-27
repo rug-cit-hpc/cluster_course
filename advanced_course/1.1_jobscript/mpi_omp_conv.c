@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
                 timer = remote_time;
         }
         printf("Run time: %f s\n", timer);
-    printf("Ran on:   %d tasks, with %d cores per task\n", num_processes, num_threads_per_task);
+        printf("Ran on:   %d tasks, with %d cores per task\n", num_processes, num_threads_per_task);
     }
 
     /* De-allocate space */
