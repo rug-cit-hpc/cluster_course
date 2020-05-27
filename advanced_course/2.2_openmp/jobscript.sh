@@ -15,6 +15,9 @@ module load foss/2020a
 # Compile the program
 make
 
+# Specify the number of threads that OpenMP applications can use.
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+
 # Convert the jpg file to the rgb format for easy processing
 convert Microcrystals.jpg Microcrystals.rgb
 # Run the convolution filter program on the image
