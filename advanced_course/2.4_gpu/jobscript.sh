@@ -11,9 +11,11 @@
 # Clean up the module environment
 module purge
 # Load the GPU compilers
-module load PGI/19.10-GCC-8.3.0-2.32 
+module load NVHPC/21.9
 # Compile the program
 make
+# Unload the compilers to prevent issues with the convert tool
+module purge
 
 # Convert the jpg file to the rgb format for easy processing
 convert Microcrystals.jpg Microcrystals.rgb
