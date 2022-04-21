@@ -1,4 +1,4 @@
-CC=pgcc
+CC=nvc
 TARGET=-ta=tesla:cc35,cc60,cc70
 CFLAGS=-acc -fast $(TARGET) -Minfo=accel -c
 LDFLAGS=-acc $(TARGET) -fast 
