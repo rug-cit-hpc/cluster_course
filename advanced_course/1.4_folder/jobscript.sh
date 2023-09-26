@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
+#SBATCH --partition=regular
 #SBATCH --job-name=Sharpening
 
 # Check if filename has been supplied
@@ -19,16 +19,18 @@ if [ -e $1 ]
 then
     echo "Processing image: " $1
 
+    # Clean up the module environment
+    module purge
+    # Load the conversion and identification tools
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
+    # Load the compilers
+    module load foss/2022b
     # Determine width and height of the image
     width=$(identify -format "%w" $1)
     height=$(identify -format "%h" $1)
     echo "Width: " $width
     echo "Height: " $height
     
-    # Clean up the module environment
-    module purge
-    # Load the compilers
-    module load foss/2020a
     # Compile the program
     make
 
