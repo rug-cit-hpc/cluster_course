@@ -17,6 +17,8 @@ fi
 # Check if file exists
 if [ -e $1 ]
 then
+    echo "Processing image: " $1
+
     # Clean up the module environment
     module purge
     # Load the compilers
@@ -25,8 +27,6 @@ then
     module load ImageMagick/7.1.0-53-GCCcore-12.2.0
     # Compile the program
     make
-
-    echo "Processing image: " $1
 
     # Convert the jpg file to the rgb format for easy processing
     convert $1 $1.rgb
