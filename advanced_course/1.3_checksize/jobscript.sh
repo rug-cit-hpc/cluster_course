@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
+#SBATCH --partition=regular
 #SBATCH --job-name=Edge_detection
 
 # Check if filename has been supplied
@@ -20,7 +20,9 @@ then
     # Clean up the module environment
     module purge
     # Load the compilers
-    module load foss/2020a
+    module load foss/2022b
+    # Load the conversion tool
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
     # Compile the program
     make
 
