@@ -16,14 +16,12 @@ module load ImageMagick/7.1.0-53-GCCcore-12.2.0
 # Compile the program
 make
 
-echo "Processing image: " $1
-
 # Convert the jpg file to the rgb format for easy processing
-convert $1 $1.rgb
+convert Microcrystals Microcrystals.rgb
 # Run the convolution filter program on the image
-./mpi_omp_conv $1.rgb 5184 3456 1 rgb
+./mpi_omp_conv Microcrystals.rgb 5184 3456 1 rgb
 # Convert the resulting file back to jpg format
-convert -size 5184x3456  -depth 8 conv_$1.rgb conv_$1
+convert -size 5184x3456 -depth 8 conv_Microcrystals.rgb conv_Microcrystals.jpg
 
 # Remove the intermediate files
-rm $1.rgb conv_$1.rgb
+rm Microcrystals.rgb conv_Microcrystals.rgb
