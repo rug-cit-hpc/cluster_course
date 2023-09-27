@@ -4,7 +4,6 @@
 #SBATCH --cpus-per-task=<c>
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
 #SBATCH --job-name=Blurring
 #SBATCH --output=gpu.out
 
@@ -16,6 +15,8 @@ module load NVHPC/21.9
 make
 # Unload the compilers to prevent issues with the convert tool
 module purge
+# Load the conversion tool
+module load ImageMagick/7.1.0-53-GCCcore-12.2.0
 
 # Convert the jpg file to the rgb format for easy processing
 convert Microcrystals.jpg Microcrystals.rgb
