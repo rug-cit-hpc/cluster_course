@@ -19,6 +19,11 @@ if [ -e "$1" ]
 then
     echo "Processing image: " $1
 
+    # Clean up the module environment
+    module purge
+    # Load the conversion and identification tools
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
+
     # Get the directory in which the file is stored
     dirname=$(dirname "$1")
     filename=$(basename "$1")
@@ -28,11 +33,6 @@ then
     height=$(identify -format "%h" "$dirname/$filename")
     echo "Width: " $width
     echo "Height: " $height
-    
-    # Clean up the module environment
-    module purge
-    # Load the conversion and identification tools
-    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
 
     # Convert the jpg file to the rgb format for easy processing
     convert "$dirname/$filename" "$filename.rgb"
