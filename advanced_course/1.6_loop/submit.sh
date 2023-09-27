@@ -3,7 +3,7 @@
 # Clean up the module environment
 module purge
 # Load the compilers
-module load foss/2020a
+module load foss/2022b
 # Compile the program
 make
 

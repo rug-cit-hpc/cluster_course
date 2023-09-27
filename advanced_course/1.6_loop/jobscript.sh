@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
+#SBATCH --partition=regular
 #SBATCH --job-name=Sharpening
 
 # Check if filename has been supplied
@@ -31,8 +31,8 @@ then
     
     # Clean up the module environment
     module purge
-    # Load the compilers
-    module load foss/2020a
+    # Load the conversion and identification tools
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
 
     # Convert the jpg file to the rgb format for easy processing
     convert "$dirname/$filename" "$filename.rgb"
