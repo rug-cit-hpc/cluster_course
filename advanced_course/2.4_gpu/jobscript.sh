@@ -10,7 +10,7 @@
 # Clean up the module environment
 module purge
 # Load the GPU compilers
-module load NVHPC/21.9
+module load NVHPC/22.7-CUDA-11.7.0
 # Compile the program
 make
 # Unload the compilers to prevent issues with the convert tool
