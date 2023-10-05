@@ -17,7 +17,7 @@ module load ImageMagick/7.1.0-53-GCCcore-12.2.0
 make
 
 # Convert the jpg file to the rgb format for easy processing
-convert Microcrystals Microcrystals.rgb
+convert Microcrystals.jpg Microcrystals.rgb
 # Run the convolution filter program on the image
 ./mpi_omp_conv Microcrystals.rgb 5184 3456 1 rgb
 # Convert the resulting file back to jpg format
