@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
+#SBATCH --partition=regular
 #SBATCH --job-name=Edge_Detection
 #SBATCH --array=1-31
 
@@ -22,6 +22,11 @@ then
     image=$(cat "$1" | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1)
     echo "Processing image: " "$image"
 
+    # Clean up the module environment
+    module purge
+    # Load the conversion and identification tools
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
+
     # Get the directory in which the file is stored
     dirname=$( dirname "$image")
     filename=$( basename "$image")
@@ -32,11 +37,6 @@ then
     echo "Width: " $width
     echo "Height: " $height
     
-    # Clean up the module environment
-    module purge
-    # Load the compilers
-    module load foss/2020a
-
     # Convert the jpg file to the rgb format for easy processing
     convert "$dirname/$filename" "$filename.rgb"
     # Run the convolution filter program on the image

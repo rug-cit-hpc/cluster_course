@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4GB
 #SBATCH --time=00:10:00
-#SBATCH --partition=short
+#SBATCH --partition=regular
 #SBATCH --job-name=Sharpening
 
 # Check if filename has been supplied
@@ -19,6 +19,15 @@ if [ -e $1 ]
 then
     echo "Processing image: " $1
 
+    # Clean up the module environment
+    module purge
+    # Load the conversion and identification tools
+    module load ImageMagick/7.1.0-53-GCCcore-12.2.0
+    # Load the compilers
+    module load foss/2022b
+    # Compile the program
+    make
+
     # Get the directory in which the file is stored
     dirname=$(dirname $1)
     filename=$(basename $1)
@@ -28,13 +37,6 @@ then
     height=$(identify -format "%h" $dirname/$filename)
     echo "Width: " $width
     echo "Height: " $height
-    
-    # Clean up the module environment
-    module purge
-    # Load the compilers
-    module load foss/2020a
-    # Compile the program
-    make
 
     # Convert the jpg file to the rgb format for easy processing
     convert $dirname/$filename $filename.rgb
