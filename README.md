@@ -1,3 +1,6 @@
+# Repository moved
+The repository for this project has moved to https://gitrepo.service.rug.nl/cit-hpc/habrok/cluster_course.
+
 # cluster_course
 Files used for courses about using the HPC cluster at the University of Groningen.
 
